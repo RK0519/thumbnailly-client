@@ -1,6 +1,6 @@
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import { useParams} from "react-router-dom"
-import { colorSchemes, type AspectRatio, type IThumbnail, type ThumbnailStyle } from "../assests/assets";
+import { colorSchemes, dummyThumbnails, type AspectRatio, type IThumbnail, type ThumbnailStyle } from "../assests/assets";
 import SoftBackdrop from "../components/SoftBackdrop";
 import AspectRatioSelector from "../components/AspectRatioSelector";
 import StyleSelector from "../components/StyleSelector";
@@ -9,13 +9,37 @@ import PreviewPanel from "../components/PreviewPanel";
 const Generate = () => {
   const {id}=useParams();
   const [title, setTitle]=useState('')
-  const [additionalDetails, setadditionalDetails]=useState('')
+  const [additionalDetails, setAdditionalDetails]=useState('')
   const [thumbnail, setThumbnail]=useState<IThumbnail | null>(null)
   const [loading, setLoading]=useState(false)
   const [aspectRatio, setAspectRatio] = useState<AspectRatio>('16:9')
   const [colorSchemeId, setColorSchemeId] = useState<string>(colorSchemes[0].id)
   const [style, setStyle] = useState<ThumbnailStyle>('Bold & Graphic')
   const [styleDropdownOpen, setStyleDropdownOpen] = useState(false)
+ 
+  const handleGenerate = async () => {
+
+  }
+
+  const fetchThumbnail = async () =>{
+    if(id){
+      const thumbnail : any = dummyThumbnails.find((thumbnail)=>thumbnail._id === id);
+      setThumbnail(thumbnail)
+      setAdditionalDetails(thumbnail.user_prompt)
+      setTitle(thumbnail.title)
+      setColorSchemeId(thumbnail.color_scheme)
+      setAspectRatio(thumbnail.aspect_ratio)
+      setStyle(thumbnail.style)
+      setLoading(false)
+    }
+  }
+
+  useEffect(()=>{
+    if(id){
+      fetchThumbnail()
+    }
+  },[id])
+
   return (
     <>
     <SoftBackdrop />
@@ -50,12 +74,12 @@ const Generate = () => {
               {/* DETAILS */}
               <div className="space-y-2">
                 <label>Additional Prompts <span className="text-zinc-400 text-xs">(optional)</span></label>
-                <textarea value={additionalDetails} onChange={(e)=>setadditionalDetails(e.target.value)} rows={3} placeholder="Add any specific elements, mood, or style preferences..." className="w-full px-4 py-3 rounded-lg border border-white/10 bg-white/6 text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-pink-500 resize-none"/>
+                <textarea value={additionalDetails} onChange={(e)=>setAdditionalDetails(e.target.value)} rows={3} placeholder="Add any specific elements, mood, or style preferences..." className="w-full px-4 py-3 rounded-lg border border-white/10 bg-white/6 text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-pink-500 resize-none"/>
               </div>
             </div>
             {/* BUTTON */}
             {!id && (
-              <button className="text-[15px] w-full py-3.5 rounded-xl font-medium bg-linear-to-b from-pink-500 to-pink-600 hover:from-pink-700 disabled:cursor-not-allowed transition-colors">
+              <button onClick={handleGenerate} className="text-[15px] w-full py-3.5 rounded-xl font-medium bg-linear-to-b from-pink-500 to-pink-600 hover:from-pink-700 disabled:cursor-not-allowed transition-colors">
                 {loading ? 'Generating.....' : 'Generate Thumbnail'}
               </button>
             )}
